@@ -1,8 +1,10 @@
 import itertools
+from functools import reduce
+import operator
 from pathlib import Path
 import sys
 
-import pymupdf as pm  # type:ignore
+import pymupdf as pm  # type: ignore
 
 
 LETTER_PAPER = pm.paper_rect("letter")
@@ -35,6 +37,45 @@ def load_files(directory: Path) -> list[pm.Document]:
     return files
 
 
+def draw_box(page: pm.Page, rect: pm.Rect, color: tuple[float, float, float]) -> None:
+    "Utility function to easily draw a rectangle for debugging purposes, mostly in crop_page()"
+    shape = page.new_shape()
+    shape.draw_rect(rect)
+    shape.finish(color=color)
+    shape.commit()
+
+
+def crop_page(page: pm.Page) -> None:
+    rects = []
+    for draw in page.get_drawings():
+        rect = draw["rect"]
+        if rect.get_area() < 500:
+            continue
+        match draw:
+            case (
+                {"color": (1, 1, 1), "fill": None}
+                | {"color": None, "fill": (1, 1, 1)}
+            ):
+                continue
+
+        rects.append(rect)
+
+    for text in page.get_text("blocks"):
+        rect = pm.Rect(text[:4])
+        if text[4].isspace():
+            continue
+        rects.append(rect)
+
+    for image in page.get_image_info():
+        rect = pm.Rect(image["bbox"])
+        rects.append(rect)
+
+    # Limit found rects to page bounds.
+    full = reduce(operator.or_, rects) & page.mediabox
+
+    page.set_cropbox(full)
+
+
 def main():
     try:
         target_dir = Path(sys.argv[1])
@@ -57,6 +98,8 @@ def main():
             )
         else:
             curr_page = output_doc[-1]
+
+        crop_page(page)
 
         area = AREA_TEMPLATE[slot]
         area_vert = area.height > area.width
