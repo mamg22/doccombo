@@ -45,7 +45,7 @@ def draw_box(page: pm.Page, rect: pm.Rect, color: tuple[float, float, float]) ->
     shape.commit()
 
 
-def crop_page(page: pm.Page) -> None:
+def crop_page(page: pm.Page) -> bool:
     if page.rotation != 0:
         page.remove_rotation()
 
@@ -73,10 +73,17 @@ def crop_page(page: pm.Page) -> None:
         rect = pm.Rect(image["bbox"])
         rects.append(rect)
 
+    # Page is empty, no noticeable elements found
+    if not rects:
+        print("dropping page", page, page.parent)
+        return False
+
     # Limit found rects to page bounds.
     full = reduce(operator.or_, rects) & page.mediabox
 
     page.set_cropbox(full)
+
+    return True
 
 
 def main():
@@ -89,20 +96,18 @@ def main():
 
     output_doc = pm.Document()
 
+    slot_iter = itertools.cycle(range(len(AREA_TEMPLATE)))
+    page_iter = filter(crop_page, itertools.chain.from_iterable(files))
+
     # Iterate on (template_slot, page) pairs.
     # The chain will extract all pages from each document
-    for slot, page in zip(
-        itertools.cycle(range(len(AREA_TEMPLATE))),
-        itertools.chain.from_iterable(files),
-    ):
+    for slot, page in zip(slot_iter, page_iter):
         if slot == 0:
             curr_page = output_doc.new_page(
                 width=LETTER_PAPER.width, height=LETTER_PAPER.height
             )
         else:
             curr_page = output_doc[-1]
-
-        crop_page(page)
 
         area = AREA_TEMPLATE[slot]
         area_vert = area.height > area.width
