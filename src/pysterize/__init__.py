@@ -46,6 +46,9 @@ def draw_box(page: pm.Page, rect: pm.Rect, color: tuple[float, float, float]) ->
 
 
 def crop_page(page: pm.Page) -> None:
+    if page.rotation != 0:
+        page.remove_rotation()
+
     rects = []
     for draw in page.get_drawings():
         rect = draw["rect"]
