@@ -75,7 +75,6 @@ def crop_page(page: pm.Page) -> bool:
 
     # Page is empty, no noticeable elements found
     if not rects:
-        print("dropping page", page, page.parent)
         return False
 
     # Limit found rects to page bounds.
