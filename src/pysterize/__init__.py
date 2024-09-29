@@ -1,3 +1,4 @@
+import argparse
 import itertools
 from functools import reduce
 import operator
@@ -85,13 +86,30 @@ def crop_page(page: pm.Page) -> bool:
     return True
 
 
-def main() -> None:
-    try:
-        target_dir = Path(sys.argv[1])
-    except IndexError:
-        target_dir = Path.cwd()
+def parse_commandline() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(
+        description="Combine documents and images in a directory into a single PDF"
+    )
+    parser.add_argument(
+        "directory",
+        help="Directory where the files to combine are located",
+        type=Path,
+    )
+    parser.add_argument(
+        "output_file",
+        help="Output filename (Default: `%(default)s`)",
+        default="out.pdf",
+        nargs="?",
+        type=Path,
+    )
 
-    files = load_files(target_dir)
+    return parser.parse_args()
+
+
+def main() -> None:
+    args = parse_commandline()
+
+    files = load_files(args.directory)
 
     output_doc = pm.Document()
 
@@ -119,7 +137,7 @@ def main() -> None:
 
         curr_page.show_pdf_page(area, page.parent, page.number, rotate=rotate)
 
-    output_doc.ez_save("out.pdf")
+    output_doc.ez_save(args.output_file)
 
 
 if __name__ == "__main__":
