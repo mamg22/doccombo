@@ -3,7 +3,6 @@ import itertools
 from functools import reduce
 import operator
 from pathlib import Path
-import sys
 
 import pymupdf as pm  # type: ignore
 
