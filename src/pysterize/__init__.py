@@ -85,7 +85,7 @@ def crop_page(page: pm.Page) -> bool:
     return True
 
 
-def main():
+def main() -> None:
     try:
         target_dir = Path(sys.argv[1])
     except IndexError:
