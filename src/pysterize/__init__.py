@@ -105,7 +105,7 @@ def parse_commandline() -> argparse.Namespace:
     )
     parser.add_argument(
         "output_file",
-        help="Output filename (Default: `%(default)s`)",
+        help="Output filename (default: `%(default)s`)",
         default="out.pdf",
         nargs="?",
         type=Path,
@@ -113,7 +113,7 @@ def parse_commandline() -> argparse.Namespace:
     parser.add_argument(
         "-c",
         "--config",
-        help="Configuration file",
+        help="Configuration file (default: `%(default)s`",
         default="config.toml",
         type=Path,
     )
