@@ -9,3 +9,4 @@ wheels/
 
 test-data/
 out.pdf
+config.toml

@@ -1,8 +1,12 @@
 import argparse
+from collections.abc import Mapping, MutableMapping
+import copy
 import itertools
-from functools import reduce
+from functools import partial, reduce
 import operator
 from pathlib import Path
+import tomllib
+from typing import Any
 
 import pymupdf as pm  # type: ignore
 
@@ -19,6 +23,9 @@ AREA_TEMPLATE = (
     pm.Rect(212, 465, 400, 769),
     pm.Rect(409, 465, 601, 770),
 )
+
+
+CONFIG_DEFAULT = {"filter": {"drawing": {"min-area": 500}}}
 
 
 def load_files(directory: Path) -> list[pm.Document]:
@@ -45,14 +52,16 @@ def draw_box(page: pm.Page, rect: pm.Rect, color: tuple[float, float, float]) ->
     shape.commit()
 
 
-def crop_page(page: pm.Page) -> bool:
+def crop_page(page: pm.Page, config: dict) -> bool:
     if page.rotation != 0:
         page.remove_rotation()
+
+    min_area = config["filter"]["drawing"]["min-area"]
 
     rects = []
     for draw in page.get_drawings():
         rect = draw["rect"]
-        if rect.get_area() < 500:
+        if rect.get_area() < min_area:
             continue
         match draw:
             case (
@@ -101,19 +110,49 @@ def parse_commandline() -> argparse.Namespace:
         nargs="?",
         type=Path,
     )
+    parser.add_argument(
+        "-c",
+        "--config",
+        help="Configuration file",
+        default="config.toml",
+        type=Path,
+    )
 
     return parser.parse_args()
+
+
+def merge_mapping[T: MutableMapping[str, Any]](
+    base: T, updates: Mapping[str, Any]
+) -> T:
+    new_map = copy.deepcopy(base)
+    for key, val in updates.items():
+        match val:
+            case Mapping():
+                new_map[key] = merge_mapping(new_map.get(key, {}), val)
+            case _:
+                new_map[key] = val
+    return new_map
+
+
+def load_config(path: Path) -> dict:
+    with open(path, "rb") as fp:
+        conf = tomllib.load(fp)
+
+    return merge_mapping(CONFIG_DEFAULT, conf)
 
 
 def main() -> None:
     args = parse_commandline()
 
     files = load_files(args.directory)
+    config = load_config(args.config)
 
     output_doc = pm.Document()
 
     slot_iter = itertools.cycle(range(len(AREA_TEMPLATE)))
-    page_iter = filter(crop_page, itertools.chain.from_iterable(files))
+    page_iter = filter(
+        partial(crop_page, config=config), itertools.chain.from_iterable(files)
+    )
 
     # Iterate on (template_slot, page) pairs.
     # The chain will extract all pages from each document
