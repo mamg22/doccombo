@@ -5,6 +5,7 @@ import itertools
 from functools import partial, reduce
 import operator
 from pathlib import Path
+import re
 import tomllib
 from typing import Any
 
@@ -72,9 +73,14 @@ def crop_page(page: pm.Page, config: dict) -> bool:
 
         rects.append(rect)
 
+    text_filters = config["filter"]["text"]
+    ignore_search = [re.compile(filt) for filt in text_filters.get("ignore-search", [])]
+
     for text in page.get_text("blocks"):
         rect = pm.Rect(text[:4])
         if text[4].isspace():
+            continue
+        if any(regex.search(text[4]) for regex in ignore_search):
             continue
         rects.append(rect)
 
