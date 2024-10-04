@@ -73,8 +73,13 @@ def crop_page(page: pm.Page, config: dict) -> bool:
 
         rects.append(rect)
 
-    text_filters = config["filter"]["text"]
-    ignore_search = [re.compile(filt) for filt in text_filters.get("ignore-search", [])]
+    try:
+        text_filters = config["filter"]["text"]
+        ignore_search = [
+            re.compile(filt) for filt in text_filters.get("ignore-search", [])
+        ]
+    except KeyError:
+        ignore_search = []
 
     for text in page.get_text("blocks"):
         rect = pm.Rect(text[:4])
