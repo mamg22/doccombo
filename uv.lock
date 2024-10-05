@@ -6,6 +6,17 @@ resolution-markers = [
 ]
 
 [[package]]
+name = "doccombo"
+version = "0.1.0"
+source = { editable = "." }
+dependencies = [
+    { name = "pymupdf" },
+]
+
+[package.metadata]
+requires-dist = [{ name = "pymupdf", specifier = ">=1.24.10" }]
+
+[[package]]
 name = "pymupdf"
 version = "1.24.10"
 source = { registry = "https://pypi.org/simple" }
@@ -37,14 +48,3 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/d3/c0/e1ed840440131f71b068cdb3b620a69ec27543b1012a6bd855d8d05f1629/PyMuPDFb-1.24.10-py3-none-win32.whl", hash = "sha256:2d231b42fe3bf79837df235e7fbdf7ff8b46bf4ca1346d0f0124fb1cdd343ce8", size = 11731706 },
     { url = "https://files.pythonhosted.org/packages/70/cb/8459d6c179befd7c6eee555334f054e9a6dcdd9f8671891e1da19e0ce526/PyMuPDFb-1.24.10-py3-none-win_amd64.whl", hash = "sha256:27ea65c701608b6b7632703339ca33ea6d513843b26dbe9bdefb2f56f7b9b196", size = 13186168 },
 ]
-
-[[package]]
-name = "pysterize"
-version = "0.1.0"
-source = { editable = "." }
-dependencies = [
-    { name = "pymupdf" },
-]
-
-[package.metadata]
-requires-dist = [{ name = "pymupdf", specifier = ">=1.24.10" }]
