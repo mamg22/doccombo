@@ -1,5 +1,5 @@
 import argparse
-from collections.abc import Mapping, MutableMapping
+from collections.abc import Mapping, MutableMapping, Iterator
 import copy
 import itertools
 from functools import partial, reduce
@@ -29,9 +29,7 @@ AREA_TEMPLATE = (
 CONFIG_DEFAULT = {"filter": {"drawing": {"min-area": 500}}}
 
 
-def load_files(directory: Path) -> list[pm.Document]:
-    files = []
-
+def load_files(directory: Path) -> Iterator[pm.Document]:
     for file in directory.iterdir():
         if file.is_dir():
             continue
@@ -40,9 +38,8 @@ def load_files(directory: Path) -> list[pm.Document]:
             if not doc.is_pdf:
                 pdf_bytes = doc.convert_to_pdf()
                 doc = pm.open(stream=pdf_bytes)
-            files.append(doc)
 
-    return files
+            yield doc
 
 
 def draw_box(page: pm.Page, rect: pm.Rect, color: tuple[float, float, float]) -> None:
