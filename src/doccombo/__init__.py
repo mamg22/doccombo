@@ -78,11 +78,11 @@ def crop_page(page: pm.Page, config: dict) -> bool:
     except KeyError:
         ignore_search = []
 
-    for text in page.get_text("blocks"):
-        rect = pm.Rect(text[:4])
-        if text[4].isspace():
+    for block in page.get_text("blocks"):
+        rect, text = pm.Rect(block[:4]), block[4]
+        if text.isspace():
             continue
-        if any(regex.search(text[4]) for regex in ignore_search):
+        if any(regex.search(text) for regex in ignore_search):
             continue
         rects.append(rect)
 
