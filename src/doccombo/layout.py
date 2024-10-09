@@ -5,6 +5,7 @@ from functools import partial, reduce
 import operator
 from pathlib import Path
 import re
+from typing import IO
 
 import pymupdf as pm  # type: ignore
 
@@ -23,15 +24,17 @@ AREA_TEMPLATE = (
 )
 
 
-type LoadSrc = str | Path | bytes | bytearray | io.BytesIO
+type LoadSrc = str | Path | bytes | bytearray | IO[bytes] | io.BytesIO
 
 
 def load_file(source: LoadSrc, filename: str | None = None) -> pm.Document:
-    match source:
-        case str() | Path():
-            doc = pm.open(source)
-        case bytes() | bytearray() | io.BytesIO():
-            doc = pm.open(stream=source, filename=filename)
+    try:
+        doc = pm.open(source)
+    except TypeError:
+        doc = pm.open(stream=source, filename=filename)
+    else:
+        if doc.name is None:
+            doc.name = filename
 
     if not doc.is_pdf:
         pdf_bytes = doc.convert_to_pdf()
@@ -130,8 +133,12 @@ def layout_pages(pages: Iterable[pm.Page]) -> pm.Document:
     return doc
 
 
-def crop_and_layout(files: Iterable[LoadSrc], config: dict) -> pm.Document:
-    files = (load_file(file) for file in files)
+def crop_and_layout(
+    file_srcs: Iterable[LoadSrc],
+    config: dict,
+    filenames: Iterable[str] | Iterable[None] = itertools.repeat(None),
+) -> pm.Document:
+    files = (load_file(file, name) for file, name in zip(file_srcs, filenames))
 
     page_iter = filter(
         partial(crop_page, config=config), itertools.chain.from_iterable(files)
