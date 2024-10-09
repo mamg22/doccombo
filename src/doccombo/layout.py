@@ -1,4 +1,5 @@
-from collections.abc import Iterator, Iterable
+from collections.abc import Iterable
+import io
 import itertools
 from functools import partial, reduce
 import operator
@@ -22,17 +23,22 @@ AREA_TEMPLATE = (
 )
 
 
-def load_files(directory: Path) -> Iterator[pm.Document]:
-    for file in directory.iterdir():
-        if file.is_dir():
-            continue
-        else:
-            doc = pm.open(file)
-            if not doc.is_pdf:
-                pdf_bytes = doc.convert_to_pdf()
-                doc = pm.open(stream=pdf_bytes)
+type LoadSrc = str | Path | bytes | bytearray | io.BytesIO
 
-            yield doc
+
+def load_file(source: LoadSrc, filename: str | None = None) -> pm.Document:
+    match source:
+        case str() | Path():
+            doc = pm.open(source)
+        case bytes() | bytearray() | io.BytesIO():
+            doc = pm.open(stream=source, filename=filename)
+
+    if not doc.is_pdf:
+        pdf_bytes = doc.convert_to_pdf()
+        doc.close()
+        doc = pm.open(stream=pdf_bytes)
+
+    return doc
 
 
 def draw_box(page: pm.Page, rect: pm.Rect, color: tuple[float, float, float]) -> None:
@@ -124,8 +130,8 @@ def layout_pages(pages: Iterable[pm.Page]) -> pm.Document:
     return doc
 
 
-def layout_from_directory(directory: Path, config: dict) -> pm.Document:
-    files = load_files(directory)
+def crop_and_layout(files: Iterable[LoadSrc], config: dict) -> pm.Document:
+    files = (load_file(file) for file in files)
 
     page_iter = filter(
         partial(crop_page, config=config), itertools.chain.from_iterable(files)
@@ -134,3 +140,9 @@ def layout_from_directory(directory: Path, config: dict) -> pm.Document:
     doc = layout_pages(page_iter)
 
     return doc
+
+
+def layout_from_directory(directory: Path, config: dict) -> pm.Document:
+    files = (file for file in directory.iterdir() if file.is_file())
+
+    return crop_and_layout(files, config)
