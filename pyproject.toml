@@ -9,7 +9,10 @@ dependencies = [
 ]
 
 [project.scripts]
-doccombo = "doccombo:main"
+doccombo = "doccombo.__main__:main"
+
+[project.optional-dependencies]
+server = []
 
 [build-system]
 requires = ["hatchling"]
