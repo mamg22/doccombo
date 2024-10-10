@@ -12,7 +12,9 @@ dependencies = [
 doccombo = "doccombo.__main__:main"
 
 [project.optional-dependencies]
-server = []
+server = [
+    "flask>=3.0.3",
+]
 
 [build-system]
 requires = ["hatchling"]
