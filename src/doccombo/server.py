@@ -47,6 +47,9 @@ def index():
     return """
     <html>
     <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>doccombo</title>
     </head>
     <body>
         <form method="POST" enctype="multipart/form-data" target="_blank">
