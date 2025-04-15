@@ -64,10 +64,10 @@ def crop_page(page: pm.Page, config: dict) -> bool:
         if rect.get_area() < min_area:
             continue
         match draw:
-            case (
-                {"color": (1, 1, 1), "fill": None}
-                | {"color": None, "fill": (1, 1, 1)}
-            ):
+            case {"color": (1, 1, 1), "fill": None} | {
+                "color": None,
+                "fill": (1, 1, 1),
+            }:
                 continue
 
         rects.append(rect)
