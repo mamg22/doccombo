@@ -5,7 +5,7 @@ import tomllib
 from typing import Any
 
 
-CONFIG_DEFAULT = {"filter": {"drawing": {"min-area": 500}}, "crop": {"enable": True}}
+CONFIG_DEFAULT = {"filter": {"drawing": {"min-area": 500}}, "crop": {"enable": False}}
 
 
 def merge_mapping[T: MutableMapping[str, Any]](
