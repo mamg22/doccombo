@@ -68,7 +68,7 @@ APP_HTML = """
 <body>
     <main>
         <h2><pre>doccombo</pre></h2>
-        <p>Seleccionelos los archivos a reducir</p>
+        <p>Seleccione los archivos a reducir<br>Se aceptan documentos e imágenes</p>
         <form method="POST" enctype="multipart/form-data" target="_blank">
             <input type="file" name="files" multiple required
                 accept="image/*,application/pdf,text/plain,.epub,.mobi,.xps,.fb2,.cbz"
