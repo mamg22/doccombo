@@ -39,28 +39,54 @@ ALLOWED_EXTENSIONS = {
 }
 
 
+APP_HTML = """
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>doccombo</title>
+    <style>
+    body {
+        width: 100svw;
+        height: 100svh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    main {
+        text-align: center;
+        border: 3px solid gray;
+        border-radius: 1em;
+        padding: 1em;
+        background-color: #eeeeee;
+    }
+    input {
+        margin: 0.5em;
+    }
+    </style>
+</head>
+<body>
+    <main>
+        <h2><pre>doccombo</pre></h2>
+        <p>Seleccionelos los archivos a reducir</p>
+        <form method="POST" enctype="multipart/form-data" target="_blank">
+            <input type="file" name="files" multiple required
+                accept="image/*,application/pdf,text/plain,.epub,.mobi,.xps,.fb2,.cbz"
+            ><br>
+            <input type="submit" value="Enviar">
+        </form>
+    </main>
+</body>
+</html>
+"""
+
+
 app = Flask(__name__)
 
 
 @app.get("/")
 def index():
-    return """
-    <html>
-    <head>
-        <meta charset="utf-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <title>doccombo</title>
-    </head>
-    <body>
-        <form method="POST" enctype="multipart/form-data" target="_blank">
-        <input type="file" name="files" multiple required
-            accept="image/*,application/pdf,text/plain,.epub,.mobi,.xps,.fb2,.cbz"
-        ><br>
-        <input type="submit">
-        </form>
-    </body>
-    </html>
-    """
+    return APP_HTML
 
 
 @app.post("/")
