@@ -96,10 +96,10 @@ def crop_page(page: pm.Page, config: dict) -> bool:
     if not rects:
         return False
 
-    # Limit found rects to page bounds.
-    full = reduce(operator.or_, rects) & page.mediabox
-
-    page.set_cropbox(full)
+    if config["crop"]["enable"]:
+        # Limit found rects to page bounds.
+        full = reduce(operator.or_, rects) & page.mediabox
+        page.set_cropbox(full)
 
     return True
 
