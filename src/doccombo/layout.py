@@ -104,8 +104,16 @@ def crop_page(page: pm.Page, config: dict) -> bool:
     return True
 
 
-def layout_pages(pages: Iterable[pm.Page]) -> pm.Document:
-    slot_iter = itertools.cycle(range(len(AREA_TEMPLATE)))
+def layout_pages(pages: Iterable[pm.Page], config: dict) -> pm.Document:
+    match config["output"]["size"]:
+        case str(size):
+            output_size = pm.paper_rect(size)
+        case size:
+            output_size = pm.Rect(size)
+
+    area_template = [pm.Rect(slot) for slot in config["output"]["template"]]
+
+    slot_iter = itertools.cycle(range(len(area_template)))
 
     doc = pm.Document()
 
@@ -113,13 +121,11 @@ def layout_pages(pages: Iterable[pm.Page]) -> pm.Document:
     # The chain will extract all pages from each document
     for slot, page in zip(slot_iter, pages):
         if slot == 0:
-            curr_page = doc.new_page(
-                width=LETTER_PAPER.width, height=LETTER_PAPER.height
-            )
+            curr_page = doc.new_page(width=output_size.width, height=output_size.height)
         else:
             curr_page = doc[-1]
 
-        area = AREA_TEMPLATE[slot]
+        area = area_template[slot]
         area_vert = area.height > area.width
         page_vert = page.rect.height > page.rect.width
 
@@ -144,7 +150,7 @@ def crop_and_layout(
         partial(crop_page, config=config), itertools.chain.from_iterable(files)
     )
 
-    doc = layout_pages(page_iter)
+    doc = layout_pages(page_iter, config)
 
     return doc
 

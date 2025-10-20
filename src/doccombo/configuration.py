@@ -4,8 +4,22 @@ from pathlib import Path
 import tomllib
 from typing import Any
 
-
-CONFIG_DEFAULT = {"filter": {"drawing": {"min-area": 500}}, "crop": {"enable": False}}
+CONFIG_DEFAULT = {
+    "filter": {"drawing": {"min-area": 500}},
+    "crop": {"enable": False},
+    "output": {
+        "size": "letter",
+        "template": [
+            [10, 13, 301, 233],
+            [314, 13, 601, 233],
+            [10, 246, 301, 454],
+            [314, 246, 601, 454],
+            [10, 465, 202, 769],
+            [212, 465, 400, 769],
+            [409, 465, 601, 770],
+        ],
+    },
+}
 
 
 def merge_mapping[T: MutableMapping[str, Any]](
